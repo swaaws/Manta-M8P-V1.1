@@ -6,7 +6,7 @@
 # 1 diag Jumper
 
 
-[tmc2209 stepper_z]
+[tmc2209 stepper_z1]
 urat_pin: PD4
 run_current: 0.8                # TODO
 stealthchop_threshold: 9999     # TODO
