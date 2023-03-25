@@ -1,11 +1,11 @@
-#S42C Closed Loop Stepper Bundle on X with endstop switch ?
+#S42C Closed Loop Stepper Bundle on M1 with endstop switch ?
 # 12V
 # 
 # Internal VCC -> VM 
 # 1 Jumper
 
 
-[stepper_x]
+[stepper_] #x
 step_pin: PE2
 dir_pin: PB4
 enable_pin: !PC11

@@ -1,4 +1,4 @@
-#TMC5160 Pro on Y with Stepper Motor from S42C Closed Loop Stepper Bundle (stepper motor direct wiring to manta m8p, no use of cls)
+#TMC5160 Pro on M2 with Stepper Motor from S42C Closed Loop Stepper Bundle (stepper motor direct wiring to manta m8p, no use of cls)
 # 12V
 # 3,8Ω
 # Internal VCC -> VM
@@ -6,7 +6,7 @@
 # 1 diag Jumper
 
 
-[tmc5160 stepper_y]
+[tmc5160 stepper_] #y
 cs_pin: PF13
 diag1_pin: ^!PF4
 spi_bus: spi1
@@ -17,7 +17,7 @@ driver_SGT: 2                  #TODO
 stealthchop_threshold: 9999    #TODO
 
 
-[stepper_y]
+[stepper_] #y
 step_pin: PF12
 dir_pin: PF11
 enable_pin: !PB3

@@ -1,4 +1,4 @@
-#TMC2209 on Z with Stepper Motor from S42C Closed Loop Stepper Bundle (stepper motor direct wiring to manta m8p, no use of cls)
+#TMC2209 on M3 with Stepper Motor from S42C Closed Loop Stepper Bundle (stepper motor direct wiring to manta m8p, no use of cls)
 # 12V
 # 3,8Ω
 # Internal VCC -> VM
@@ -6,13 +6,13 @@
 # 1 diag Jumper
 
 
-[tmc2209 stepper_z]
+[tmc2209 stepper_] #z
 urat_pin: PF9
 run_current: 0.8                # TODO
 stealthchop_threshold: 9999     # TODO
 
 
-[stepper_z]
+[stepper_] #z
 step_pin: PD7
 dir_pin: !PD6
 enable_pin: !PF10
