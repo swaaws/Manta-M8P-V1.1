@@ -7,7 +7,7 @@
 
 
 [tmc2209 stepper_] #z1
-urat_pin: PD4
+uart_pin: PD4
 run_current: 0.8                # TODO
 stealthchop_threshold: 9999     # TODO
 
