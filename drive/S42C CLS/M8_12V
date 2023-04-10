@@ -5,7 +5,7 @@
 # 0 Jumper
 
 
-[stepper_] #z5
+[stepper_] #e2
 step_pin: PD8
 dir_pin: PC6
 enable_pin: !PC7

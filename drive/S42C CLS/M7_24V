@@ -1,5 +1,5 @@
 #S42C Closed Loop Stepper Bundle on M7 used as extruder
-# 12V
+# 24V
 # 
 # Internal VCC -> VM 
 # 0 Jumper
