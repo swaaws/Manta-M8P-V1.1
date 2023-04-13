@@ -6,7 +6,7 @@
 # 1 diag Jumper
 
 
-[tmc5160 stepper_] #z
+[tmc5160 stepper_z] #z
 cs_pin: PF9
 diag1_pin: ^!PF5
 spi_bus: spi1
@@ -17,7 +17,7 @@ driver_SGT: 2                  #TODO
 stealthchop_threshold: 9999    #TODO
 
 
-[stepper_] #z
+[stepper_z] #z
 step_pin: PD7
 dir_pin: PD6
 enable_pin: !PF10

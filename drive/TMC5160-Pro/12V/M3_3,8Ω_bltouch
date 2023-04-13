@@ -1,0 +1,28 @@
+#TMC5160 Pro on M3 with Stepper Motor from S42C Closed Loop Stepper Bundle (stepper motor direct wiring to manta m8p, no use of cls)
+# 12V
+# 3,8Ω
+# Internal VCC -> VM
+# 4 Jumper
+# 1 diag Jumper
+
+
+[tmc5160 stepper_z] #z
+cs_pin: PF9
+diag1_pin: ^!PF5
+spi_bus: spi1
+interpolate: False 
+run_current: 0.8               #TODO
+sense_resistor: 0.075          #TODO
+driver_SGT: 2                  #TODO
+stealthchop_threshold: 9999    #TODO
+
+
+[stepper_z] #z
+step_pin: PD7
+dir_pin: PD6
+enable_pin: !PF10
+microsteps: 16                 #TODO
+rotation_distance: 40          #TODO
+endstop_pin: probe:z_virtual_endstop
+position_max: 470
+homing_speed: 50               #TODO

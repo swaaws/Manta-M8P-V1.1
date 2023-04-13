@@ -6,24 +6,24 @@
 # 1 diag Jumper
 
 
-[tmc5160 stepper_] #z1
+[tmc5160 stepper_z1] #z1
 cs_pin: PD4
-diag1_pin: ^!PC0
+#diag1_pin: ^!PC0
 spi_bus: spi1
 interpolate: False 
-run_current: 0.4               #TODO
+run_current: 0.8               #TODO
 sense_resistor: 0.075          #TODO
 driver_SGT: 2                  #TODO
 stealthchop_threshold: 9999    #TODO
 
 
-[stepper_] #z1
+[stepper_z1] #z1
 step_pin: PD3
 dir_pin: PD2
 enable_pin: !PD5
 microsteps: 16                 #TODO
 rotation_distance: 40          #TODO
-endstop_pin: tmc5160_stepper_z1:virtual_endstop
-position_endstop: 0
-position_max: 470
-homing_speed: 50               #TODO
+#endstop_pin: tmc5160_stepper_z1:virtual_endstop
+#position_endstop: 0
+#position_max: 470
+#homing_speed: 50               #TODO
