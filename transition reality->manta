@@ -10,37 +10,17 @@
 
 # Use at your own risk. it works for me but it may not work for you!.
 
-#S42C Closed Loop Stepper Bundle on M1 with endstop switch ?
-# 24V
-# 
-# Internal VCC -> VM 
-# 1 Jumper: 2 row, red/black 
 
-
-[stepper_x] #x
-step_pin: manta:PE2
-dir_pin: manta:PB4
-enable_pin: !manta:PC11
-microsteps: 16
-full_steps_per_rotation: 200 
-rotation_distance: 40
-endstop_pin: ^manta:PF4
-#position_min: -1
-position_endstop: 0
-position_max: 450
-homing_speed: 50
-
-
-[stepper_y]
-step_pin: PF6
-dir_pin: !PF7
-enable_pin: !PF2
-microsteps: 16
-rotation_distance: 40
-endstop_pin: ^PJ1
-position_endstop: 0
-position_max: 450
-homing_speed: 50
+#[stepper_y]
+#step_pin: PF6
+#dir_pin: !PF7
+#enable_pin: !PF2
+#microsteps: 16
+#rotation_distance: 40
+#endstop_pin: ^PJ1
+#position_endstop: 0
+#position_max: 450
+#homing_speed: 50
 
 [stepper_z]
 step_pin: PL3
@@ -121,9 +101,7 @@ serial: /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AK06VNFL-if00-port0
 baud: 115200
 restart_method: command
 
-[filament_switch_sensor filament_sensor]
-pause_on_runout: True
-switch_pin:PE4
+
 
 [printer]
 kinematics: cartesian
@@ -204,64 +182,82 @@ gcode:
 
 
 
-[gcode_macro PAUSE]
-description: Pause the actual running print
-rename_existing: PAUSE_BASE
-# change this if you need more or less extrusion
-variable_extrude: 1.0
+
+
+
+#[filament_motion_sensor runout]
+##   The minimum length of filament pulled through the sensor to trigger
+##   a state change on the switch_pin
+##   Default is 7 mm.
+#detection_length: 14.0
+#extruder: extruder
+#pause_on_runout: FALSE
+#runout_gcode:
+#  {action_respond_info("RUNOUT: Filament runout")}
+#  PAUSE
+#insert_gcode: {action_respond_info("RUNOUT: Filament inserted")}
+##   The minimum amount of time in seconds to delay between events.
+##   Events triggered during this time period will be silently
+##   ignored. The default is 3 seconds.
+##event_delay: 3.0
+##   The amount of time to delay, in seconds, between the pause command
+##   dispatch and execution of the runout_gcode. It may be useful to
+##   increase this delay if OctoPrint exhibits strange pause behavior.
+##   Default is 0.5 seconds.
+##pause_delay: 0.5
+###    XYE mcu E0DET
+#switch_pin: ^!P1.26
+
+[filament_switch_sensor filament_sensor]
+##   When set to True, a PAUSE will execute immediately after a runout
+##   is detected. Note that if pause_on_runout is False and the
+##   runout_gcode is omitted then runout detection is disabled. Default
+##   is True.
+pause_on_runout: TRUE
+runout_gcode: {action_respond_info("RUNOUT: Toolhead Filament runout")}
+  PAUSE
+  SAVE_GCODE_STATE NAME=runout_state
+insert_gcode: {action_respond_info("RUNOUT: Toolhead Filament inserted")}
+##   The minimum amount of time in seconds to delay between events.
+##   Events triggered during this time period will be silently
+##   ignored. The default is 3 seconds.
+##event_delay: 3.0
+##   The amount of time to delay, in seconds, between the pause command
+##   dispatch and execution of the runout_gcode. It may be useful to
+##   increase this delay if OctoPrint exhibits strange pause behavior.
+##   Default is 0.5 seconds.
+##pause_delay: 0.5
+##    XYE mcu E1DET
+switch_pin:PE4
+
+#####################################################################
+# 	Macro
+#####################################################################
+[gcode_macro SET_FILAMENT_SENSOR]
+description: Sets the filament sensor on/off and save value to file
+rename_existing: SET_FILAMENT_SENSOR_BASE
 gcode:
-  ##### read E from pause macro #####
-  {% set E = printer["gcode_macro PAUSE"].extrude|float %}
-  ##### set park positon for x and y #####
-  # default is your max posion from your printer.cfg
-  {% set x_park = printer.toolhead.axis_maximum.x|float - 5.0 %}
-  {% set y_park = printer.toolhead.axis_maximum.y|float - 5.0 %}
-  ##### calculate save lift position #####
-  {% set max_z = printer.toolhead.axis_maximum.z|float %}
-  {% set act_z = printer.toolhead.position.z|float %}
-  {% if act_z < (max_z - 2.0) %}
-      {% set z_safe = 2.0 %}
+  {% if printer.save_variables.variables.filament_sensor is not defined %}
+    {% set filament_sensor = {params.SENSOR|string: params.ENABLE|int} %}
   {% else %}
-      {% set z_safe = max_z - act_z %}
+    {% set filament_sensor = printer.save_variables.variables.filament_sensor %}
+    {% set _dummy = filament_sensor.update({params.SENSOR|string: params.ENABLE|int}) %}
   {% endif %}
-  ##### end of definitions #####
-  PAUSE_BASE
-  G91
-  {% if printer.extruder.can_extrude|lower == 'true' %}
-    G1 E-{E} F2100
-  {% else %}
-    {action_respond_info("Extruder not hot enough")}
-  {% endif %}
-  {% if "xyz" in printer.toolhead.homed_axes %}
-    G1 Z{z_safe} F900
-    G90
-    G1 X{x_park} Y{y_park} F6000
-  {% else %}
-    {action_respond_info("Printer not homed")}
-  {% endif %} 
+  SET_FILAMENT_SENSOR_BASE SENSOR={params.SENSOR} ENABLE={params.ENABLE}
+  SAVE_VARIABLE VARIABLE=filament_sensor VALUE="{filament_sensor}"
 
-
-[gcode_macro RESUME]
-description: Resume the actual running print
-rename_existing: RESUME_BASE
+[gcode_macro _RESTORE_FILAMENT_SENSOR]
+description: Restore the filament sensor on/off state at klipper start
 gcode:
-  ##### read E from pause macro #####
-  {% set E = printer["gcode_macro PAUSE"].extrude|float %}
-  #### get VELOCITY parameter if specified ####
-  {% if 'VELOCITY' in params|upper %}
-    {% set get_params = ('VELOCITY=' + params.VELOCITY)  %}
-  {%else %}
-    {% set get_params = "" %}
+  {% if printer.save_variables.variables.filament_sensor is defined %}
+    {% for sensor in printer.save_variables.variables.filament_sensor %}
+       SET_FILAMENT_SENSOR_BASE SENSOR={sensor} ENABLE={printer.save_variables.variables.filament_sensor[sensor]}
+    {% endfor %}
   {% endif %}
-  ##### end of definitions #####
-  {% if printer.extruder.can_extrude|lower == 'true' %}
-    G91
-    G1 E{E} F2100
-  {% else %}
-    {action_respond_info("Extruder not hot enough")}
-  {% endif %}  
-  RESUME_BASE {get_params}
-
+  
+[gcode_macro M600]
+description: Filament change
+gcode: PAUSE Y=0   ; everything needed is defined there
 
 [gcode_macro CANCEL_PRINT]
 description: Cancel the actual running print
@@ -320,16 +316,74 @@ serial: /dev/serial/by-id/usb-Klipper_stm32g0b1xx_m8p-if00
 
 # X M1 
 #[include Manta-M8P-V1.1/drive/S42C-CLS/24V/M1]
-[include Manta-M8P-V1.1-main/drive/S42C-CLS/24V/M1]
+#[include Manta-M8P-V1.1-main/drive/S42C-CLS/24V/M1]
+#S42C Closed Loop Stepper Bundle on M1 with endstop switch ?
+# 24V
+# 
+# Internal VCC -> VM 
+# 1 Jumper: 2 row, red/black 
+
+
+[stepper_x] #x
+step_pin: manta:PE2
+dir_pin: manta:PB4
+enable_pin: !manta:PC11
+microsteps: 16
+full_steps_per_rotation: 200 
+rotation_distance: 40
+endstop_pin: ^manta:PC2
+#position_min: -1
+position_endstop: 0
+position_max: 450
+homing_speed: 50 
+
 
 # Y M2 
-#[include Manta-M8P-V1.1-main/drive/TMC2209/24V/M2_3,8Ω]
+#[include Manta-M8P-V1.1-main/drive/TMC5160-Pro/24V/M2_3,8Ω]
+#TMC5160 Pro on M2 with Stepper Motor from S42C Closed Loop Stepper Bundle (stepper motor direct wiring to manta m8p, no use of cls)
+# 12V
+# 3,8Ω
+# Internal VCC -> VM
+# 4 Jumper
+# 1 diag Jumper
+
+
+
+[tmc5160 stepper_y]
+spi_software_sclk_pin: manta:PA5
+spi_software_mosi_pin: manta:PA7
+spi_software_miso_pin: manta:PA6
+cs_pin: manta:PF13
+#diag1_pin: ^!manta:PF4
+#spi_bus: spi1
+interpolate: False 
+run_current: 0.8               #TODO
+sense_resistor: 0.075          #TODO
+driver_SGT: 2                  #TODO
+stealthchop_threshold: 9999    #TODO
+
+
+
+
+[stepper_y]
+step_pin: manta:PF12
+dir_pin: !manta:PF11
+enable_pin: !manta:PB3
+microsteps: 16                 #TODO
+rotation_distance: 40          #TODO
+endstop_pin: manta:PF4 
+#tmc5160_stepper_y:virtual_endstop
+position_endstop: 0
+position_max: 450
+homing_speed: 50               #TODO
+
+
 
 #[include Manta-M8P-V1.1-main/drive/TMC2209/sensorless_home.cfg]
 
 # Z M3 + M4
-#[include Manta-M8P-V1.1-main/drive/TMC2209/12V/M3_3,8Ω_bltouch]
-#[include Manta-M8P-V1.1-main/drive/TMC2209/12V/M4_3,8Ω]
+#[include Manta-M8P-V1.1-main/drive/TMC5160-Pro/24V/M3_3,8Ω_bltouch]
+#[include Manta-M8P-V1.1-main/drive/TMC5160-Pro/24V/M4_3,8Ω]
 
 # BL Touch
 #[include Manta-M8P-V1.1-main/probe/bltouch]
@@ -400,3 +454,69 @@ pin: PE6
 #screw3_name: front left
 #screw4: 430,40
 #screw4_name: front right
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [bed_mesh default]
+#*# version = 1
+#*# points =
+#*# 	  0.490000, -0.017500, -0.422500, -0.658750, -0.773750
+#*# 	  0.456250, -0.023750, -0.318750, -0.535000, -0.556250
+#*# 	  0.465000, 0.017500, -0.282500, -0.410000, -0.398750
+#*# 	  0.508750, 0.085000, -0.178750, -0.272500, -0.230000
+#*# 	  0.537500, 0.185000, -0.053750, -0.111250, -0.028750
+#*# x_count = 5
+#*# y_count = 5
+#*# mesh_x_pps = 2
+#*# mesh_y_pps = 2
+#*# algo = lagrange
+#*# tension = 0.2
+#*# min_x = 50.0
+#*# max_x = 400.0
+#*# min_y = 50.0
+#*# max_y = 400.0
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [bed_mesh default]
+#*# version = 1
+#*# points =
+#*# 	  0.646250, 0.268750, -0.005000, -0.062500, 0.001250
+#*# 	  0.608750, 0.227500, 0.010000, -0.005000, 0.085000
+#*# 	  0.577500, 0.230000, 0.036250, 0.020000, 0.147500
+#*# 	  0.603750, 0.283750, 0.101250, 0.095000, 0.253750
+#*# 	  0.605000, 0.346250, 0.175000, 0.200000, 0.397500
+#*# x_count = 5
+#*# y_count = 5
+#*# mesh_x_pps = 2
+#*# mesh_y_pps = 2
+#*# algo = lagrange
+#*# tension = 0.2
+#*# min_x = 50.0
+#*# max_x = 400.0
+#*# min_y = 50.0
+#*# max_y = 400.0
+
+#*# <---------------------- SAVE_CONFIG ---------------------->
+#*# DO NOT EDIT THIS BLOCK OR BELOW. The contents are auto-generated.
+#*#
+#*# [bed_mesh default]
+#*# version = 1
+#*# points =
+#*# 	  0.591250, 0.150000, -0.142500, -0.212500, -0.157500
+#*# 	  0.533750, 0.128750, -0.120000, -0.178750, -0.100000
+#*# 	  0.540000, 0.128750, -0.128750, -0.188750, -0.042500
+#*# 	  0.547500, 0.170000, -0.036250, -0.072500, 0.045000
+#*# 	  0.593750, 0.243750, 0.053750, 0.015000, 0.148750
+#*# x_count = 5
+#*# y_count = 5
+#*# mesh_x_pps = 2
+#*# mesh_y_pps = 2
+#*# algo = lagrange
+#*# tension = 0.2
+#*# min_x = 50.0
+#*# max_x = 400.0
+#*# min_y = 50.0
+#*# max_y = 400.0
