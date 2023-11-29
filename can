@@ -1,0 +1,92 @@
+
+#vim /etc/BordEnv.txt
+dtoverlay=mcp2515-can0,oscillator=12000000,interrupt=25,spimaxfrequency=1000000
+
+
+#vim /etc/network/interfaces.d/can0
+allow-hotplug can0
+iface can0 can static
+     bitrate 500000
+     up ifconfig $IFACE txqueuelen 2048
+
+
+#Manta M8P Config for Katapult/Canboot 
+           Katapult Configuration v0.0.1-59-g0ac72fc
+    Micro-controller Architecture (STMicroelectronics STM32)  --->
+    Processor model (STM32G0B1)  --->
+    Build Katapult deployment application (Do not build)  --->
+    Clock Reference (8 MHz crystal)  --->
+    Communication interface (CAN bus (on PD12/PD13))  --->
+    Application start offset (8KiB offset)  --->
+(1000000) CAN bus speed
+()  GPIO pins to set on bootloader entry
+[*] Support bootloader entry on rapid double click of reset button
+[ ] Enable bootloader entry on button (or gpio) state
+[ ] Enable Status LED
+
+
+
+#Klipper Config for Manta M8P needs CanBoot/katapult
+            Klipper Firmware Configuration
+[*] Enable extra low-level configuration options
+    Micro-controller Architecture (STMicroelectronics STM32)  --->
+    Processor model (STM32G0B1)  --->
+    Bootloader offset (8KiB bootloader)  --->
+    Clock Reference (8 MHz crystal)  --->
+    Communication interface (USB to CAN bus (USB on PA11/PA12))  --->
+    CAN bus interface (CAN bus (on PD12/PD13))  --->
+(1000000) CAN bus speed
+()  GPIO pins to set at micro-controller startup
+
+
+
+
+
+#Katapult Config for Hermit Crab
+           Katapult Configuration v0.0.1-59-g0ac72fc
+    Micro-controller Architecture (STMicroelectronics STM32)  --->
+    Processor model (STM32F072)  --->
+    Build Katapult deployment application (Do not build)  --->
+    Clock Reference (8 MHz crystal)  --->
+    Communication interface (CAN bus (on PB8/PB9))  --->
+    Application start offset (8KiB offset)  --->
+(1000000) CAN bus speed
+()  GPIO pins to set on bootloader entry
+[*] Support bootloader entry on rapid double click of reset button
+[ ] Enable bootloader entry on button (or gpio) state
+[ ] Enable Status LED
+
+
+
+
+
+#Klipper Config for Hermit Crab needs CanBoot/katapult
+            Klipper Firmware Configuration
+[*] Enable extra low-level configuration options
+    Micro-controller Architecture (STMicroelectronics STM32)  --->
+    Processor model (STM32F072)  --->
+    Bootloader offset (8KiB bootloader)  --->
+    Clock Reference (8 MHz crystal)  --->
+    Communication interface (CAN bus (on PB8/PB9))  --->
+(1000000) CAN bus speed
+()  GPIO pins to set at micro-controller startup
+
+
+
+
+
+
+
+
+
+
+#Bootloader
+sudo dfu-util -a 0 -D ~/katapult/out/canboot.bin --dfuse-address 0x08000000:force:mass-erase -d 0483:df11
+#Klipper (bin depend on device)
+sudo dfu-util -a 0 -d 0483:df11 --dfuse-address 0x08002000:force:leave -D ~/klipper/out/klipper.bin
+
+
+
+#Qurey Canbus IDs
+~/klippy-env/bin/python ~/klipper/scripts/canbus_query.py can0
+./katapult/scripts/flash_can.py -q
