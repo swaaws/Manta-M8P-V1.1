@@ -6,24 +6,32 @@
 # 1 diag Jumper
 
 
-[tmc5160 stepper_y] #y
+
+[tmc5160 stepper_y]
+spi_software_sclk_pin: PA5
+spi_software_mosi_pin: PA7
+spi_software_miso_pin: PA6
 cs_pin: PF13
-diag1_pin: ^!PF4
-spi_bus: spi1
+#diag1_pin: ^!PF4
+#spi_bus: spi1
 interpolate: False 
-run_current: 0.4               #TODO
+run_current: 0.8               #TODO
 sense_resistor: 0.075          #TODO
 driver_SGT: 2                  #TODO
-stealthchop_threshold: 9999    #TODO
+stealthchop_threshold: 999999    #TODO
 
 
-[stepper_y] #y
+
+
+[stepper_y]
 step_pin: PF12
-dir_pin: PF11
+dir_pin: !PF11
 enable_pin: !PB3
-microsteps: 16                 #TODO
+microsteps: 128                 #TODO
 rotation_distance: 40          #TODO
-endstop_pin: tmc5160_stepper_y:virtual_endstop
-position_endstop: 0
-position_max: 450
+endstop_pin: PF4 
+#tmc5160_stepper_y:virtual_endstop
+position_min: -51
+position_endstop: -50
+position_max: 425
 homing_speed: 50               #TODO
