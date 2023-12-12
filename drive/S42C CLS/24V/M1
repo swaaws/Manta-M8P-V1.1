@@ -13,7 +13,6 @@ microsteps: 128
 full_steps_per_rotation: 200 
 rotation_distance: 40
 endstop_pin: ^PC2
-#position_min: -1
 position_endstop: 0
 position_max: 403
 homing_speed: 50

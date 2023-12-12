@@ -11,7 +11,6 @@ cs_pin: PF9
 spi_software_sclk_pin: PA5
 spi_software_mosi_pin: PA7
 spi_software_miso_pin: PA6
-#spi_bus: spi1
 #diag1_pin: PF5
 run_current: 0.650
 stealthchop_threshold: 999999

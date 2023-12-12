@@ -13,7 +13,6 @@ spi_software_mosi_pin: PA7
 spi_software_miso_pin: PA6
 cs_pin: PF13
 #diag1_pin: ^!PF4
-#spi_bus: spi1
 interpolate: False 
 run_current: 0.8               #TODO
 sense_resistor: 0.075          #TODO
